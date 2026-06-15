@@ -1,0 +1,72 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+frontend/.next/
+frontend/node_modules/
+
+# ── Go ────────────────────────────────────────────────────────────────────────
+server/sentinel-server
+agents/LinuxAgent/sentinel-agent-linux
+agents/LinuxAgent/linux_agent
+
+# ── Logs / PID files ─────────────────────────────────────────────────────────
+logs/*.log
+logs/*.log.old
+logs/*.pid
+
+# ── Environment & Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.key
+*.pem
+*.secret
+
+# ── ML Models (large files) ──────────────────────────────────────────────────
+# Note: use Git LFS for large .pt files if needed
+sentinel-ai/models/behavioral/
+sentinel-ai/models/*.pt
+
+# ── Visual Studio Build Artifacts ────────────────────────────────────────────
+*.ilk
+*.iobj
+*.ipdb
+*.obj
+*.tlog/
+agents/WindowsAgent/x64/
+agents/WindowsAgent/WindowsAgent/x64/
+
+# ── Compiled Binaries ────────────────────────────────────────────────────────
+# Source code is provided; build from source using Visual Studio or GCC
+agents/WindowsAgent/x64/Debug/WindowsAgent.exe
+agents/WindowsAgent/x64/Release/WindowsAgent.exe
+
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Docker volume data ────────────────────────────────────────────────────────
+postgres_data/
+redis_data/
+
+# ── Temporary / internal scripts ─────────────────────────────────────────────
+*patch_*.py
+proje_devam_promptu.md

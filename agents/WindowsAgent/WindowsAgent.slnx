@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="WindowsAgent/WindowsAgent.vcxproj" Id="2fff16ff-2528-4d75-892e-be1d529b7839" />
+</Solution>
