@@ -27,16 +27,16 @@ import (
 const (
 	PORT       = ":8080"
 	SECRET_KEY = "EDR_SUPER_SECRET_KEY"
-	AI_ADDR    = "http://localhost:8000"
 )
 
 // Çalışma zamanı yapılandırma — ortam değişkenlerinden okunur
 var (
+	AI_ADDR          = getenv("AI_ADDR",         "http://localhost:8000")
 	REDIS_ADDR       = getenv("REDIS_ADDR",       "localhost:6379")
 	REDIS_PASSWORD   = getenv("REDIS_PASSWORD",   "sentinel_redis_pass")
 	JWT_SECRET       = getenv("JWT_SECRET",       "sentinel-xdr-jwt-secret-2024-change-in-production")
 	INTERNAL_SECRET  = getenv("INTERNAL_SECRET",  "sentinel-internal-ai-secret-2024")
-	CERTS_DIR        = getenv("CERTS_DIR",        "/home/quietus/Project-Sentinel/certs")
+	CERTS_DIR        = getenv("CERTS_DIR",        "/app/certs")
 )
 
 // loadTLSConfig — mTLS konfigürasyonı oluşturur (Phase 5)

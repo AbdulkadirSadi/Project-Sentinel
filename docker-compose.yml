@@ -1,43 +1,123 @@
 version: '3.8'
+
+networks:
+  sentinel-net:
+    driver: bridge
+
+volumes:
+  pg_data:
+
 services:
+  # ── Infrastructure ─────────────────────────────────────────────────────────
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: sentinel-postgres
     environment:
       POSTGRES_USER:     ${POSTGRES_USER:-sentinel}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_DB:       ${POSTGRES_DB:-sentinel_db}
     ports:
-      - "127.0.0.1:5432:5432"   # localhost only — not exposed to external network
+      - "127.0.0.1:5432:5432"   # localhost only
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - sentinel-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentinel} -d ${POSTGRES_DB:-sentinel_db}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    restart: unless-stopped
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: sentinel-redis
     command: redis-server --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
     ports:
-      - "127.0.0.1:6379:6379"   # localhost only
+      - "127.0.0.1:6379:6379"
+    networks:
+      - sentinel-net
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
+    restart: unless-stopped
+
+  # ── Application ────────────────────────────────────────────────────────────
+  sentinel-ai:
+    build:
+      context: ./sentinel-ai
+      dockerfile: Dockerfile
+    container_name: sentinel-ai
+    env_file:
+      - ./sentinel-ai/.env
+    environment:
+      # docker-compose, .env üzerindeki DATABASE_URL'yi override eder
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sentinel}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sentinel_db}
+      SERVER_API:   http://sentinel-server:8081
+    volumes:
+      - ./sentinel-ai/models:/app/models:ro        # ML modelleri (read-only)
+      - ./sentinel-ai/yara_rules:/app/yara_rules:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks:
+      - sentinel-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  sentinel-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: sentinel-server
+    environment:
+      AI_ADDR:          http://sentinel-ai:8000
+      DATABASE_URL:     postgresql://${POSTGRES_USER:-sentinel}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sentinel_db}
+      REDIS_ADDR:       redis:6379
+      REDIS_PASSWORD:   ${REDIS_PASSWORD}
+      INTERNAL_SECRET:  ${INTERNAL_SECRET:?Set INTERNAL_SECRET in .env}
+      CERTS_DIR:        /app/certs
+    volumes:
+      - ./certs:/app/certs:ro       # TLS sertifikaları (read-only)
+    ports:
+      - "0.0.0.0:8080:8080"   # Agent bağlantıları (dış ağa açık)
+      - "127.0.0.1:8081:8081" # REST API (sadece localhost)
+    networks:
+      - sentinel-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      sentinel-ai:
+        condition: service_started
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sentinel-dashboard
+    environment:
+      GO_SERVER_URL: http://sentinel-server:8081
+      AI_SERVER_URL: http://sentinel-ai:8000
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - sentinel-net
+    depends_on:
+      - sentinel-server
+      - sentinel-ai
+    restart: unless-stopped
 
   adminer:
     image: adminer:latest
     container_name: sentinel-adminer
     ports:
-      - "127.0.0.1:5051:8080"   # localhost only — http://localhost:5051
+      - "127.0.0.1:5051:8080"
+    networks:
+      - sentinel-net
     depends_on:
       - postgres
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-
-volumes:
-  pg_data:
+    restart: unless-stopped

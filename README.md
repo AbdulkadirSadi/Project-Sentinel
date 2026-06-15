@@ -139,47 +139,43 @@ Score ≥ 90 → automatic quarantine_file action
 
 ## 🚀 Quick Start
 
+> **TL;DR — 4 commands from zero to running platform:**
+> ```bash
+> git clone https://github.com/AbdulkadirSadi/Project-Sentinel.git && cd Project-Sentinel
+> cp .env.example .env && cp sentinel-ai/.env.example sentinel-ai/.env
+> # Edit both .env files — set strong passwords and secrets
+> bash certs/generate.sh      # Generate TLS certificates (one-time)
+> docker compose up -d        # Build and start all 5 services
+> ```
+> **Dashboard** → http://localhost:3000 · **AI API Swagger** → http://localhost:8000/docs
+
+---
+
 ### Prerequisites
 
-| Tool | Version | Purpose |
-|---|---|---|
-| Docker + Docker Compose | Latest | PostgreSQL + Redis containers |
-| Go | 1.22+ | Build the C2 server |
-| Python | 3.12+ | AI service |
-| Node.js | 20+ | Dashboard (Next.js) |
-| GCC / OpenSSL dev | Any | Build Linux agent |
-| Visual Studio 2022 | Any edition | Build Windows agent (optional) |
-| OpenSSL CLI | Any | Generate TLS certificates |
+| Tool | Required for |
+|---|---|
+| **Docker + Docker Compose** | Everything (server, AI, dashboard, DB) |
+| **OpenSSL CLI** | Generate TLS certificates (one-time) |
+| GCC + libssl-dev | Linux agent (if deploying) |
+| Visual Studio 2022 | Windows agent (if deploying) |
 
-**Install Docker (Ubuntu/Debian):**
+**Install Docker on Ubuntu/Debian:**
 ```bash
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER   # re-login after this
 ```
 
-**Install Go:**
-```bash
-wget https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && source ~/.bashrc
-```
 
-**Install Python deps & Node.js:**
-```bash
-sudo apt install python3.12 python3.12-venv python3-pip gcc libssl-dev -y
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
-sudo apt install nodejs -y
-```
-
----
 
 ### 1. Clone & Configure
 
 ```bash
 git clone https://github.com/AbdulkadirSadi/Project-Sentinel.git
 cd Project-Sentinel
-mkdir -p certs logs
 ```
+
+
 
 **Create `sentinel-ai/.env`** (AI service configuration):
 
