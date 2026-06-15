@@ -70,3 +70,8 @@ redis_data/
 # ── Temporary / internal scripts ─────────────────────────────────────────────
 *patch_*.py
 proje_devam_promptu.md
+# Visual Studio local cache (never commit)
+.vs/
+*.ipch
+*.VC.db
+*.VC.opendb
