@@ -208,10 +208,6 @@ POSTGRES_DB=sentinel_db
 REDIS_PASSWORD=AnotherStrongPassword
 ```
 
-> ⚠️ Both `.env` files are in `.gitignore` — they are **never committed**. Use strong, unique passwords.
-
----
-
 ### 2. Generate TLS Certificates
 
 ```bash
